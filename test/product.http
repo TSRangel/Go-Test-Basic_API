@@ -9,7 +9,7 @@ Content-Type: "application/json"
 ###
 
 GET http://localhost:8000/products HTTP/1.1
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3MDgxNzI5ODAsInN1YiI6Ijk5OTk2NWZhLTFlYjgtNDBkOC05NGY2LWVlMzU3MTlkNDA3YSJ9.kXc3RtGglYf9GBFAbjPMJJ0gtx-8lLdY2HnYM6icMuQ
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3MDg3MTIwMDQsInN1YiI6Ijk5OTk2NWZhLTFlYjgtNDBkOC05NGY2LWVlMzU3MTlkNDA3YSJ9.KrguJmszNkEec4BIw5T4x77JUDNohqKLtLkjRikevJs
 
 ###
 

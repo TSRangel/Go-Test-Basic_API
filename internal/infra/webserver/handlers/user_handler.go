@@ -14,15 +14,11 @@ import (
 
 type UserHandler struct {
 	DB database.UserInterface
-	Jwt *jwtauth.JWTAuth
-	JwtExpiresIn int
 }
 
-func NewUserHandler(db database.UserInterface, jwt *jwtauth.JWTAuth, expiresIn int) *UserHandler {
+func NewUserHandler(db database.UserInterface) *UserHandler {
 	return &UserHandler{
 		DB: db,
-		Jwt: jwt,
-		JwtExpiresIn: expiresIn,
 	}
 }
 
@@ -54,6 +50,8 @@ func(uh *UserHandler) Create(w http.ResponseWriter, r *http.Request) {
 }
 
 func(uh *UserHandler) Login(w http.ResponseWriter, r *http.Request) {
+	jwtToken := r.Context().Value("token").(*jwtauth.JWTAuth)
+	jwtExpiresIn := r.Context().Value("expiresIn").(int)
 	var userLoginDTO dto.UserLoginInput
 	err := json.NewDecoder(r.Body).Decode(&userLoginDTO)
 	if err != nil {
@@ -72,9 +70,9 @@ func(uh *UserHandler) Login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	_, tokenString, err := uh.Jwt.Encode(map[string]interface{}{
+	_, tokenString, err := jwtToken.Encode(map[string]interface{}{
 		"sub": searchedUser.ID.String(),
-		"exp": time.Now().Add(time.Second * time.Duration(uh.JwtExpiresIn)).Unix(),
+		"exp": time.Now().Add(time.Second * time.Duration(jwtExpiresIn)).Unix(),
 	})
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
