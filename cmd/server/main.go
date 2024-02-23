@@ -30,7 +30,7 @@ func main() {
 	// 	panic(err)
 	// }
 	productHandler := handlers.NewProductHandler(database.NewProductConnection(db))
-	userHandler := handlers.NewUserHandler(database.NewUserConnection(db), cfg.TokenAuth, cfg.JWTExpiresIn)
+	userHandler := handlers.NewUserHandler(database.NewUserConnection(db))
 
 	r := chi.NewRouter()
 	
@@ -48,6 +48,8 @@ func main() {
 	})
 	
 	r.Route("/users", func (r chi.Router) {
+		r.Use(middleware.WithValue("token", cfg.TokenAuth))
+		r.Use(middleware.WithValue("expiresIn", cfg.JWTExpiresIn))
 		r.Post("/", userHandler.Create)
 		r.Get("/login", userHandler.Login)
 	})
