@@ -12,6 +12,10 @@ import (
 	"github.com/go-chi/jwtauth"
 )
 
+type Error struct {
+	Message string `json:"message"`
+}
+
 type UserHandler struct {
 	DB database.UserInterface
 }
@@ -22,7 +26,17 @@ func NewUserHandler(db database.UserInterface) *UserHandler {
 	}
 }
 
-func(uh *UserHandler) Create(w http.ResponseWriter, r *http.Request) {
+// Create 		godoc
+// @Summary 	Create user
+// @Description Create user
+// @Tags 		users
+// @Accept 		json
+// @Produce 	json
+// @Param 		request 	body 	dto.CreateUserInput 	true 	"user request"
+// @Success 	201
+// @Failure 	500		{object}	Error
+// @Router		/users	[post]
+func (uh *UserHandler) Create(w http.ResponseWriter, r *http.Request) {
 	var newUserDTO dto.CreateUserInput
 	err := json.NewDecoder(r.Body).Decode(&newUserDTO)
 	if err != nil {
@@ -37,19 +51,34 @@ func(uh *UserHandler) Create(w http.ResponseWriter, r *http.Request) {
 	newUser, err := user.NewUser(newUserDTO.Name, newUserDTO.Email, newUserDTO.Password)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
+		error := Error{Message: err.Error()}
+		json.NewEncoder(w).Encode(error)
 		return
 	}
 
 	err = uh.DB.Create(newUser)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
+		error := Error{Message: err.Error()}
+		json.NewEncoder(w).Encode(error)
 		return
 	}
-
+	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 }
 
-func(uh *UserHandler) Login(w http.ResponseWriter, r *http.Request) {
+// Login 		godoc
+// @Summary 	Get a user JWT
+// @Description Get a user JWT
+// @Tags 		users
+// @Accpet 		json
+// @Produce 	json
+// @Param 		request 	body 	dto.UserLoginInput 	true 	"user credentials"
+// @Success 	200 	{objetc} 	dto.JWTTokenOutput
+// @Failure 	404		{object}	Error
+// @Failure 	500 	{object} 	Error
+// @Router 		/users/login 		[post]
+func (uh *UserHandler) Login(w http.ResponseWriter, r *http.Request) {
 	jwtToken := r.Context().Value("token").(*jwtauth.JWTAuth)
 	jwtExpiresIn := r.Context().Value("expiresIn").(int)
 	var userLoginDTO dto.UserLoginInput
@@ -61,7 +90,9 @@ func(uh *UserHandler) Login(w http.ResponseWriter, r *http.Request) {
 
 	searchedUser, err := uh.DB.FindByEmail(userLoginDTO.Email)
 	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
+		w.WriteHeader(http.StatusNotFound)
+		error := Error{Message: err.Error()}
+		json.NewEncoder(w).Encode(error)
 		return
 	}
 
@@ -78,11 +109,7 @@ func(uh *UserHandler) Login(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-	accessToken := struct{
-		AccessToken string `json:"access_token"`
-	}{
-		AccessToken: tokenString,
-	}
+	accessToken := dto.JWTTokenOutput{AccessToken: tokenString}
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(accessToken)
 	w.WriteHeader(http.StatusOK)

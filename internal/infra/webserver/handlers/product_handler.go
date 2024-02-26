@@ -20,6 +20,17 @@ func NewProductHandler(db database.ProductInterface) *ProductHandler {
 	return &ProductHandler{DB: db}
 }
 
+// Create Product 	godoc
+// @Summary Create 	product
+// @Description 	Create product
+// @Tags 			products
+// @Accpet 			json
+// @Produce 		json
+// @Param 			request 	body 	dto.CreateProductInput 	true 	"product request"
+// @Success 		201
+// @Failure 		500 		{object} Error
+// @Router 			/products 	[post]
+// @Security 		ApiKeyAuth
 func (ph *ProductHandler) CreateProduct(w http.ResponseWriter, r *http.Request) {
 	var productDTO dto.CreateProductInput
 	err := json.NewDecoder(r.Body).Decode(&productDTO)
@@ -39,7 +50,20 @@ func (ph *ProductHandler) CreateProduct(w http.ResponseWriter, r *http.Request) 
 	w.WriteHeader(http.StatusCreated)
 }
 
-func(ph *ProductHandler) ListAllProducts(w http.ResponseWriter, r *http.Request) {
+// List Products 	godoc
+// @Summary 		List products
+// @Description 	Get all products
+// @Tags 			products
+// @Accept 			json
+// @Produce 		json
+// @Param 			page query string false "page number"
+// @Param 			limit query string false "limit"
+// @Success 		200 {array} product.Product
+// @Failure 		404 {object} Error
+// @Failure 		500 {object} Error
+// @Router 			/products [get]
+// @Security 		ApiKeyAuth
+func (ph *ProductHandler) ListAllProducts(w http.ResponseWriter, r *http.Request) {
 	page := chi.URLParam(r, "page")
 	limit := chi.URLParam(r, "limit")
 	sort := chi.URLParam(r, "sort")
@@ -53,7 +77,7 @@ func(ph *ProductHandler) ListAllProducts(w http.ResponseWriter, r *http.Request)
 	}
 	products, err := ph.DB.FindAll(pageInt, limitInt, sort)
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
+		w.WriteHeader(http.StatusNotFound)
 		return
 	}
 	w.Header().Set("Content-Type", "application/json")
@@ -65,7 +89,7 @@ func(ph *ProductHandler) ListAllProducts(w http.ResponseWriter, r *http.Request)
 	w.WriteHeader(http.StatusOK)
 }
 
-func(ph *ProductHandler) ListProductByID(w http.ResponseWriter, r *http.Request) {
+func (ph *ProductHandler) ListProductByID(w http.ResponseWriter, r *http.Request) {
 	id := chi.URLParam(r, "id")
 	product, err := ph.DB.FindByID(id)
 	if err != nil {
@@ -81,7 +105,7 @@ func(ph *ProductHandler) ListProductByID(w http.ResponseWriter, r *http.Request)
 	w.WriteHeader(http.StatusOK)
 }
 
-func(ph *ProductHandler) UpdateProduct(w http.ResponseWriter, r *http.Request) {
+func (ph *ProductHandler) UpdateProduct(w http.ResponseWriter, r *http.Request) {
 	id := chi.URLParam(r, "id")
 	if id == "" {
 		w.WriteHeader(http.StatusBadRequest)
@@ -110,7 +134,7 @@ func(ph *ProductHandler) UpdateProduct(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 }
 
-func(ph *ProductHandler) DeleteProduct(w http.ResponseWriter, r *http.Request) {
+func (ph *ProductHandler) DeleteProduct(w http.ResponseWriter, r *http.Request) {
 	id := chi.URLParam(r, "id")
 	if id == "" {
 		w.WriteHeader(http.StatusBadRequest)
