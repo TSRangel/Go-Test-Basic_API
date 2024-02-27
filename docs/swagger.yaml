@@ -76,8 +76,6 @@ paths:
             type: array
         "404":
           description: Not Found
-          schema:
-            $ref: '#/definitions/handlers.Error'
         "500":
           description: Internal Server Error
           schema:
@@ -108,6 +106,92 @@ paths:
       security:
       - ApiKeyAuth: []
       summary: "Create \tproduct"
+      tags:
+      - products
+  /products/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete a product
+      parameters:
+      - description: product ID
+        format: uuid
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "404":
+          description: Not Found
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handlers.Error'
+      security:
+      - ApiKeyAuth: []
+      summary: Delete a product
+      tags:
+      - products
+    get:
+      description: Get a product
+      parameters:
+      - description: product ID
+        format: uuid
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/product.Product'
+        "404":
+          description: Not Found
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handlers.Error'
+      security:
+      - ApiKeyAuth: []
+      summary: Get a product
+      tags:
+      - products
+    put:
+      description: Update a product
+      parameters:
+      - description: product ID
+        format: uuid
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: product request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.CreateProductInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "404":
+          description: Not Found
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handlers.Error'
+      security:
+      - ApiKeyAuth: []
+      summary: Update a product
       tags:
       - products
   /users:
